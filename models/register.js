@@ -1,3 +1,4 @@
+const {success, error} = require('./config')
 const mongodb = require('./db');
 const express = require('express')
 const router = express()
@@ -6,9 +7,9 @@ router.get('/', (req, res) => {
     const name = req.query.name
     const password = req.query.password
     if (!name) {
-        return res.send('请输入用户名')
+        return res.send({statueCode: error.code, msg: '用户名不能为空'})
     } else if (!password) {
-        return res.send('请输入密码')
+        return res.send({statueCode: error.code, msg: '密码不能为空'})
     }
     //打开数据库
     mongodb.open(function (err, db) {
@@ -19,7 +20,7 @@ router.get('/', (req, res) => {
         db.collection('users', function (err, collection) {
             if (err) {
                 mongodb.close();
-                return res.send(err);//错误，返回 err 信息
+                return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
             }
             //查找用户名（name键）值为 name 一个文档
             collection.findOne({
@@ -27,11 +28,11 @@ router.get('/', (req, res) => {
             }, function (err, user) {
                 if (err) {
                     mongodb.close();
-                    return res.send(err);//失败！返回 err 信息
+                    return res.send({statueCode: error.code, msg: err});//失败！返回 err 信息
                 }
                 if (user) {
                     mongodb.close();
-                    return res.send('该用户已存在')
+                    return res.send({statueCode: error.code, msg: '该用户已存在'})
                 } else {
                     //将用户数据插入 users 集合
                     collection.insert({
@@ -42,9 +43,9 @@ router.get('/', (req, res) => {
                     }, function (err, user) {
                         mongodb.close();
                         if (err) {
-                            return res.send(err);//错误，返回 err 信息
+                            return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
                         }
-                        res.send(user);//成功！err 为 null，并返回存储后的用户文档
+                        res.send({statueCode: success.code, msg: '注册成功'});//成功！err 为 null，并返回存储后的用户文档
                     });
                 }
             })
