@@ -6,6 +6,7 @@
     "start": "node app.js"
   },
   "dependencies": {
+    "big-integer": "^1.6.28",
     "connect-mongo": "^2.0.1",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
