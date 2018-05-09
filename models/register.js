@@ -1,6 +1,5 @@
 const {success, error} = require('./config')
 const crypto = require('crypto');
-const { createWebAPIRequest } = require('../util/util');
 const mongodb = require('./db');
 const express = require('express')
 const router = express()
@@ -13,28 +12,6 @@ router.get('/', (req, res) => {
     } else if (!password) {
         return res.send({statueCode: error.code, msg: '密码不能为空'})
     }
-    const cookie = req.get('Cookie') ? req.get('Cookie') : ''
-    const md5sum = crypto.createHash('md5')
-    password = md5sum.update(password).digest('hex')
-    const data = {
-        name: name,
-        password: password
-    }
-    createWebAPIRequest(
-        '192.168.1.6',
-        '/register',
-        'POST',
-        data,
-        cookie,
-        (req, cookie) => {
-            console.log(req)
-            res.set({
-                'Set-Cookie': cookie
-            })
-            res.send(req)
-        },
-        err => res.status(502).send('fetch error')
-    )
     //打开数据库
     mongodb.open(function (err, db) {
         if (err) {

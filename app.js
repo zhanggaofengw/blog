@@ -1,37 +1,41 @@
 const express = require("express");
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
+const MongoStore = require('connect-mongo')(session);
 const http = require("http");
 const path = require("path");
 const settings = require('./settings');
 const app = express();
-const session = require('express-session');
-const MongoStore = require('connect-mongo')(session);
-
+app.use(cookieParser())
 // 跨域设置
 app.all('*', function (req, res, next) {
     if (req.path !== '/' && !req.path.includes('.')) {
-        res.header('Access-Control-Allow-Credentials', true)
+        res.header('Access-Control-Allow-Credentials', true);
         // 这里获取 origin 请求头 而不是用 *
-        res.header('Access-Control-Allow-Origin', req.headers['origin'] || '*')
-        res.header('Access-Control-Allow-Headers', 'X-Requested-With')
-        res.header('Access-Control-Allow-Methods', 'PUT,POST,GET,DELETE,OPTIONS')
-        res.header('Content-Type', 'application/json;charset=utf-8')
+        res.header('Access-Control-Allow-Origin', req.headers['origin'] || '*');
+        res.header('Access-Control-Allow-Headers', 'X-Requested-With');
+        res.header('Access-Control-Allow-Methods', 'PUT,POST,GET,DELETE,OPTIONS');
+        res.header('Content-Type', 'application/json;charset=utf-8');
     }
     next()
 })
+//注册
+app.use("/register", require("./models/register"));
+
 app.use(session({
     secret: settings.cookieSecret,
     key: settings.db,//cookie name
     cookie: {maxAge: 1000 * 60 * 60 * 24 * 30},//30 days
+    saveUninitialized: true,  // 是否自动保存未初始化的会话，建议false
+    resave: false,  // 是否每次都重新保存会话，建议false
     store: new MongoStore({
-        url: `mongodb://${settings.host}/${settings.db}`
+        url: `mongodb://${settings.host}:${settings.port}/${settings.db}`
     })
 }));
-app.use(express.static(path.resolve(__dirname, "public")));
-
+//验证码
+app.use("/captcha", require("./models/captcha"));
 //登录
 app.use("/login", require("./models/login"));
-//注册
-app.use("/register", require("./models/register"));
 
 const port = process.env.PORT || 8888;
 
