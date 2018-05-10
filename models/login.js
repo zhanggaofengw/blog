@@ -7,7 +7,10 @@ const router = express();
 router.get('/', (req, res) => {
     const name = req.query.name
     const password = req.query.password
-    const captcha = req.query.captcha.toLowerCase()
+    let captcha
+    if (req.query.captcha) {
+        captcha = req.query.captcha.toLowerCase()
+    }
     const captchaTime = req.query.time
     if (!name) {
         return res.send({statueCode: error.code, msg: '用户名不能为空'})
@@ -15,7 +18,7 @@ router.get('/', (req, res) => {
         return res.send({statueCode: error.code, msg: '密码不能为空'})
     } else if (!captcha) {
         return res.send({statueCode: error.code, msg: '验证码不能为空'})
-    } else if (captcha !== req.session[captchaTime]){
+    } else if (captcha !== req.session[captchaTime]) {
         return res.send({statueCode: error.code, msg: '验证码错误'})
     }
     //打开数据库
@@ -39,9 +42,11 @@ router.get('/', (req, res) => {
                 }
                 if (!user) {
                     res.send({statueCode: error.code, msg: '该用户不存在'});//失败！返回 err 信息
-                } else if(user.password === password){
+                } else if (user.password === password) {
+                    req.session.isLogin = true;
+                    req.session.cookie.expires = 1000 * 60 * 30;
                     res.send({statueCode: success.code, msg: '登录成功'});//成功！返回查询的用户信息
-                } else if(user.password !== password){
+                } else if (user.password !== password) {
                     res.send({statueCode: error.code, msg: '用户名或密码错误'});
                 }
             });

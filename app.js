@@ -17,6 +17,13 @@ app.all('*', function (req, res, next) {
         res.header('Access-Control-Allow-Methods', 'PUT,POST,GET,DELETE,OPTIONS');
         res.header('Content-Type', 'application/json;charset=utf-8');
     }
+    //if (req.path !== '/login' && req.path !== '/captcha' && req.path !== '/register') {
+    //    if (!req.session) {
+    //        return res.send({msg: '登录超时'})
+    //    } else {
+    //        req.session.cookie.expires = 1000 * 60 * 30;
+    //    }
+    //}
     next()
 })
 //注册
@@ -32,10 +39,14 @@ app.use(session({
         url: `mongodb://${settings.host}:${settings.port}/${settings.db}`
     })
 }));
+
 //验证码
 app.use("/captcha", require("./models/captcha"));
 //登录
 app.use("/login", require("./models/login"));
+
+//分类/标签
+app.use("/tag", require("./models/tag"));
 
 const port = process.env.PORT || 8888;
 
