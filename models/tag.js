@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express();
-const mongodb = require('./db');
+const {MongoClient, url}= require('./db');
 const {success, error} = require('./config');
 const ObjectId = require('mongodb').ObjectId
 
@@ -16,14 +16,14 @@ router.get('/add', function (req, res) {
         return res.send({statueCode: error.code, msg: '颜色不能为空'})
     }
     //打开数据库
-    mongodb.open(function (err, db) {
+    MongoClient.connect(url,function (err, db) {
         if (err) {
             return res.send(err);//错误，返回 err 信息
         }
         //读取 tags 集合
         db.collection('tags', function (err, collection) {
             if (err) {
-                mongodb.close();
+                db.close();
                 return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
             }
             //查找用户名（name键）值为 name 一个文档
@@ -31,11 +31,11 @@ router.get('/add', function (req, res) {
                 name: name
             }, function (err, tag) {
                 if (err) {
-                    mongodb.close();
+                    db.close();
                     return res.send({statueCode: error.code, msg: err});//失败！返回 err 信息
                 }
                 if (tag) {
-                    mongodb.close();
+                    db.close();
                     return res.send({statueCode: error.code, msg: '该名称已存在'})
                 } else {
                     //将用户数据插入 tags 集合
@@ -46,7 +46,7 @@ router.get('/add', function (req, res) {
                     }, {
                         safe: true
                     }, function (err, tag) {
-                        mongodb.close();
+                        db.close();
                         if (err) {
                             return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
                         }
@@ -59,19 +59,19 @@ router.get('/add', function (req, res) {
 });
 router.get('/select', function (req, res) {
     //打开数据库
-    mongodb.open(function (err, db) {
+    MongoClient.connect(url,function (err, db) {
         if (err) {
             return res.send(err);//错误，返回 err 信息
         }
         //读取 tags 集合
         db.collection('tags', function (err, collection) {
             if (err) {
-                mongodb.close();
+                db.close();
                 return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
             }
             //查询所有
             collection.find({}).toArray(function (err, tags) {
-                mongodb.close();
+                db.close();
                 if (err) {
                     return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
                 }
@@ -90,14 +90,14 @@ router.get('/update', function (req, res) {
         return res.send({statueCode: error.code, msg: '颜色不能为空'})
     }
     //打开数据库
-    mongodb.open(function (err, db) {
+    MongoClient.connect(url,function (err, db) {
         if (err) {
             return res.send(err);//错误，返回 err 信息
         }
         //读取 tags 集合
         db.collection('tags', function (err, collection) {
             if (err) {
-                mongodb.close();
+                db.close();
                 return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
             }
             //更新
@@ -106,7 +106,7 @@ router.get('/update', function (req, res) {
                 {
                     $set: {name: name, color: color}
                 }, (function (err) {
-                    mongodb.close();
+                    db.close();
                     if (err) {
                         return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
                     }
@@ -118,19 +118,19 @@ router.get('/update', function (req, res) {
 router.get('/delete', function (req, res) {
     const id = req.query.id
     //打开数据库
-    mongodb.open(function (err, db) {
+    MongoClient.connect(url,function (err, db) {
         if (err) {
             return res.send(err);//错误，返回 err 信息
         }
         //读取 tags 集合
         db.collection('tags', function (err, collection) {
             if (err) {
-                mongodb.close();
+                db.close();
                 return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
             }
             //更新
             collection.deleteOne({_id: ObjectId(id)}, (function (err) {
-                mongodb.close();
+                db.close();
                 if (err) {
                     return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
                 }

@@ -1,8 +1,8 @@
 const {success, error} = require('./config')
 const crypto = require('crypto');
-const mongodb = require('./db');
-const express = require('express')
-const router = express()
+const {MongoClient, url}= require('./db');
+const express = require('express');
+const router = express();
 //读取用户信息
 router.get('/', (req, res) => {
     const name = req.query.name
@@ -13,14 +13,14 @@ router.get('/', (req, res) => {
         return res.send({statueCode: error.code, msg: '密码不能为空'})
     }
     //打开数据库
-    mongodb.open(function (err, db) {
+    MongoClient.connect(url,function (err, db) {
         if (err) {
             return res.send(err);//错误，返回 err 信息
         }
         //读取 users 集合
         db.collection('users', function (err, collection) {
             if (err) {
-                mongodb.close();
+                db.close();
                 return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
             }
             //查找用户名（name键）值为 name 一个文档
@@ -28,11 +28,11 @@ router.get('/', (req, res) => {
                 name: name
             }, function (err, user) {
                 if (err) {
-                    mongodb.close();
+                    db.close();
                     return res.send({statueCode: error.code, msg: err});//失败！返回 err 信息
                 }
                 if (user) {
-                    mongodb.close();
+                    db.close();
                     return res.send({statueCode: error.code, msg: '该用户已存在'})
                 } else {
                     //将用户数据插入 users 集合
@@ -42,7 +42,7 @@ router.get('/', (req, res) => {
                     }, {
                         safe: true
                     }, function (err, user) {
-                        mongodb.close();
+                        db.close();
                         if (err) {
                             return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
                         }

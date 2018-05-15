@@ -32,11 +32,11 @@ app.use("/register", require("./models/register"));
 app.use(session({
     secret: settings.cookieSecret,
     key: settings.db,//cookie name
-    cookie: {maxAge: 1000 * 60 * 60 * 24 * 30},//30 days
+    cookie: {maxAge: 1000 * 60 * 60},//30 days
     saveUninitialized: true,  // 是否自动保存未初始化的会话，建议false
     resave: false,  // 是否每次都重新保存会话，建议false
     store: new MongoStore({
-        url: `mongodb://${settings.host}:${settings.port}/${settings.db}`
+        url: `mongodb://zgf:admin@${settings.host}:${settings.port}/${settings.db}`
     })
 }));
 
