@@ -3,7 +3,8 @@ const router = express();
 const {MongoClient, url}= require('./db');
 const {success, error} = require('./config');
 const ObjectId = require('mongodb').ObjectId
-
+const SORT = 1
+const TAG = 2
 router.get('/add', function (req, res) {
     const category = req.query.category
     const name = req.query.sortOrTagName
@@ -16,7 +17,7 @@ router.get('/add', function (req, res) {
         return res.send({statueCode: error.code, msg: '颜色不能为空'})
     }
     //打开数据库
-    MongoClient.connect(url,function (err, db) {
+    MongoClient.connect(url, function (err, db) {
         if (err) {
             return res.send(err);//错误，返回 err 信息
         }
@@ -59,7 +60,7 @@ router.get('/add', function (req, res) {
 });
 router.get('/select', function (req, res) {
     //打开数据库
-    MongoClient.connect(url,function (err, db) {
+    MongoClient.connect(url, function (err, db) {
         if (err) {
             return res.send(err);//错误，返回 err 信息
         }
@@ -90,7 +91,7 @@ router.get('/update', function (req, res) {
         return res.send({statueCode: error.code, msg: '颜色不能为空'})
     }
     //打开数据库
-    MongoClient.connect(url,function (err, db) {
+    MongoClient.connect(url, function (err, db) {
         if (err) {
             return res.send(err);//错误，返回 err 信息
         }
@@ -106,11 +107,29 @@ router.get('/update', function (req, res) {
                 {
                     $set: {name: name, color: color}
                 }, (function (err) {
-                    db.close();
                     if (err) {
+                        db.close();
                         return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
                     }
-                    return res.send({statueCode: success.code, msg: '修改成功'});//成功
+                    // $lookup多表关联不知道怎么查询出数组对应的所有数据，暂用此方法过渡
+                    db.collection('articles', function (err, collection) {
+                        if (err) {
+                            db.close();
+                            return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
+                        }
+                        //更新
+                        collection.update(
+                            {"tagAndSort._id": id},
+                            {
+                                $set: {"tagAndSort.$.name": name, "tagAndSort.$.color": color}
+                            },{multi: true}, (function (err) {
+                                db.close();
+                                if (err) {
+                                    return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
+                                }
+                                return res.send({statueCode: success.code, msg: '修改成功'});//成功
+                            }));
+                    });
                 }));
         });
     });
@@ -118,7 +137,7 @@ router.get('/update', function (req, res) {
 router.get('/delete', function (req, res) {
     const id = req.query.id
     //打开数据库
-    MongoClient.connect(url,function (err, db) {
+    MongoClient.connect(url, function (err, db) {
         if (err) {
             return res.send(err);//错误，返回 err 信息
         }
