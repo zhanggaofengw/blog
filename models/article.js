@@ -2,15 +2,14 @@ const express = require('express');
 const router = express();
 const {MongoClient, url}= require('./db');
 const {success, error} = require('./config');
-
+const ObjectId = require('mongodb').ObjectId
 router.post('/add', function (req, res) {
     const articleType = req.body.type //1为保存文章，0为草稿
     const articleTitle = req.body.articleTitle
-    const articleSorts = req.body.sortList
-    const articleTags = req.body.tagList
+    const articleSorts = req.body.articleSorts
+    const articleTags = req.body.articleTags
     const articleComment = req.body.comment //1、开启评论 0、关闭评论
     const articleContent = req.body.content
-    const tagAndSort = req.body.tagAndSort
     if (articleType == 1) {
         if (!articleTitle) {
             return res.send({statueCode: error.code, msg: '请输入文章标题'})
@@ -55,7 +54,7 @@ router.post('/add', function (req, res) {
                         articleComment: articleComment,
                         createdAt: createdAt,
                         articleType: articleType,
-                        tagAndSort: tagAndSort
+                        pageViews: 0 //浏览量初始默认为0
                     }, {
                         safe: true
                     }, function (err) {
@@ -73,6 +72,7 @@ router.post('/add', function (req, res) {
     });
 });
 router.get('/query', function (req, res) {
+    const id = req.query.id
     //打开数据库
     MongoClient.connect(url, function (err, db) {
         if (err) {
@@ -84,8 +84,14 @@ router.get('/query', function (req, res) {
                 db.close();
                 return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
             }
+            let query = {}
+            if (id) {
+                query = {
+                    _id: ObjectId(id)
+                }
+            }
             //查询所有
-            collection.find({}).toArray(function (err, articles) {
+            collection.find(query).toArray(function (err, articles) {
                 db.close();
                 if (err) {
                     return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
