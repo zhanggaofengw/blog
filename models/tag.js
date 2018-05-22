@@ -85,6 +85,7 @@ router.get('/update', function (req, res) {
     const id = req.query._id
     const name = req.query.name
     const color = req.query.color
+    const category = req.query.category
     if (!name) {
         return res.send({statueCode: error.code, msg: '名称不能为空'})
     } else if (!color) {
@@ -117,11 +118,20 @@ router.get('/update', function (req, res) {
                             db.close();
                             return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
                         }
+                        let query = {}
+                        let set = {}
+                        if (category ==1) {
+                            query = {"articleSorts._id": id}
+                            set = {"articleSorts.$.name": name, "articleSorts.$.color": color}
+                        } else {
+                            query = {"articleTags._id": id}
+                            set = {"articleTags.$.name": name, "articleTags.$.color": color}
+                        }
                         //更新
                         collection.update(
-                            {"tagAndSort._id": id},
+                            query,
                             {
-                                $set: {"tagAndSort.$.name": name, "tagAndSort.$.color": color}
+                                $set: set
                             },{multi: true}, (function (err) {
                                 db.close();
                                 if (err) {
