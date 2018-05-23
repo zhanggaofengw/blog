@@ -102,45 +102,59 @@ router.get('/update', function (req, res) {
                 db.close();
                 return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
             }
-            //更新
-            collection.update(
-                {_id: ObjectId(id)},
-                {
-                    $set: {name: name, color: color}
-                }, (function (err) {
-                    if (err) {
-                        db.close();
-                        return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
-                    }
-                    // $lookup多表关联不知道怎么查询出数组对应的所有数据，暂用此方法过渡
-                    db.collection('articles', function (err, collection) {
-                        if (err) {
-                            db.close();
-                            return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
-                        }
-                        let query = {}
-                        let set = {}
-                        if (category ==1) {
-                            query = {"articleSorts._id": id}
-                            set = {"articleSorts.$.name": name, "articleSorts.$.color": color}
-                        } else {
-                            query = {"articleTags._id": id}
-                            set = {"articleTags.$.name": name, "articleTags.$.color": color}
-                        }
-                        //更新
-                        collection.update(
-                            query,
-                            {
-                                $set: set
-                            },{multi: true}, (function (err) {
+            collection.findOne({
+                name: name,
+                _id: {"$ne": ObjectId(id)}
+            }, function (err, tag) {
+                if (err) {
+                    db.close();
+                    return res.send({statueCode: error.code, msg: err});//失败！返回 err 信息
+                }
+                if (tag) {
+                    db.close();
+                    return res.send({statueCode: error.code, msg: '该名称已存在'})
+                } else {
+                    //更新
+                    collection.update(
+                        {_id: ObjectId(id)},
+                        {
+                            $set: {name: name, color: color}
+                        }, (function (err) {
+                            if (err) {
                                 db.close();
+                                return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
+                            }
+                            //
+                            db.collection('articles', function (err, collection) {
                                 if (err) {
+                                    db.close();
                                     return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
                                 }
-                                return res.send({statueCode: success.code, msg: '修改成功'});//成功
-                            }));
-                    });
-                }));
+                                let query = {}
+                                let set = {}
+                                if (category == 1) {
+                                    query = {"articleSorts._id": id}
+                                    set = {"articleSorts.$.name": name, "articleSorts.$.color": color}
+                                } else {
+                                    query = {"articleTags._id": id}
+                                    set = {"articleTags.$.name": name, "articleTags.$.color": color}
+                                }
+                                //更新
+                                collection.update(
+                                    query,
+                                    {
+                                        $set: set
+                                    }, {multi: true}, (function (err) {
+                                        db.close();
+                                        if (err) {
+                                            return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
+                                        }
+                                        return res.send({statueCode: success.code, msg: '修改成功'});//成功
+                                    }));
+                            });
+                        }));
+                }
+            })
         });
     });
 });
