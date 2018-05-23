@@ -74,6 +74,9 @@ router.post('/add', function (req, res) {
 });
 router.get('/query', function (req, res) {
     const id = req.query.id
+    const param = req.query.param
+    const currentPage = parseInt(req.query.currentPage)
+    const pageSize = parseInt(req.query.pageSize)
     //打开数据库
     MongoClient.connect(url, function (err, db) {
         if (err) {
@@ -90,15 +93,29 @@ router.get('/query', function (req, res) {
                 query = {
                     _id: ObjectId(id)
                 }
+            } else if (param) {
+                query = {
+                    articleTitle: {$regex: param, $options: "$i"}
+                    //$or: [
+                    //    {articleTitle: {$regex: param, $options: "$i"}},
+                    //    {articleContent: {$regex: param, $options: "$i"}}
+                    //]
+                }
             }
             //查询所有
-            collection.find(query).toArray(function (err, articles) {
-                db.close();
+            collection.count(query, function(err, total) {
                 if (err) {
+                    db.close();
                     return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
                 }
-                return res.send({statueCode: success.code, articleList: articles});//成功
-            });
+                collection.find(query).skip((currentPage-1) * pageSize).sort("createdAt", -1).limit(pageSize).toArray(function (err, articles) {
+                    db.close();
+                    if (err) {
+                        return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
+                    }
+                    return res.send({statueCode: success.code, articleList: articles, rows: total});//成功
+                });
+            })
         });
     });
 });
