@@ -3,6 +3,7 @@ const {MongoClient, url}= require('./db');
 const express = require('express');
 const session = require('express-session');
 const router = express();
+const ObjectId = require('mongodb').ObjectId;
 //读取用户信息
 router.get('/', (req, res) => {
     const name = req.query.name
@@ -36,16 +37,34 @@ router.get('/', (req, res) => {
             collection.findOne({
                 name: name
             }, function (err, user) {
-                db.close();
                 if (err) {
+                    db.close();
                     return res.send({statueCode: error.code, msg: err});//失败！返回 err 信息
                 }
                 if (!user) {
+                    db.close();
                     res.send({statueCode: error.code, msg: '该用户不存在'});//失败！返回 err 信息
                 } else if (user.password === password) {
                     req.session.isLogin = true;
                     req.session.cookie.expires = 1000 * 60 * 30;
                     res.send({statueCode: success.code, msg: '登录成功'});//成功！返回查询的用户信息
+                    const loginCount = user.loginCount + 1;
+                    const id = user._id;
+                    const lastVisit = new Date().toLocaleString();
+                    // 更新登录次数
+                    collection.update(
+                        {_id: ObjectId(id)},
+                        {
+                            $set: {
+                                loginCount: loginCount,
+                                lastVisit: lastVisit
+                            }
+                        }, function (err) {
+                            db.close();
+                            if (err) {
+
+                            }
+                        });
                 } else if (user.password !== password) {
                     res.send({statueCode: error.code, msg: '用户名或密码错误'});
                 }

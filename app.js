@@ -29,8 +29,6 @@ app.all('*', function (req, res, next) {
     //}
     next()
 })
-//注册
-app.use("/register", require("./models/register"));
 
 app.use(session({
     secret: settings.cookieSecret,
@@ -43,17 +41,27 @@ app.use(session({
     })
 }));
 
+//注册
+app.use("/register", require("./models/register"));
+
 //验证码
 app.use("/captcha", require("./models/captcha"));
+
 //登录
 app.use("/login", require("./models/login"));
 
 //分类/标签
 app.use("/tag", require("./models/tag"));
+
 //上传图片
 app.use("/uploadImg", require("./models/uploadImg"));
+
 //上传、删除、修改文章
 app.use("/article", require("./models/article"));
+
+//用户管理
+app.use("/user", require("./models/user"));
+
 const port = process.env.PORT || 8888;
 
 app.listen(port, () => {

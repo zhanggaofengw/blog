@@ -34,10 +34,14 @@ router.get('/', (req, res) => {
                     db.close();
                     return res.send({statueCode: error.code, msg: '该用户已存在'})
                 } else {
+                    const createdAt = new Date().toLocaleString()
                     //将用户数据插入 users 集合
                     collection.insert({
                         name: name,
-                        password: password
+                        password: password,
+                        createdAt: createdAt,
+                        lastVisit: '', //上次登录时间
+                        loginCount: 0 //登录次数默认为0
                     }, {
                         safe: true
                     }, function (err, user) {
@@ -45,7 +49,7 @@ router.get('/', (req, res) => {
                         if (err) {
                             return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
                         }
-                        res.send({statueCode: success.code, msg: '注册成功'});//成功！err 为 null，并返回存储后的用户文档
+                        res.send({statueCode: success.code, msg: '添加成功'});//成功！err 为 null，并返回存储后的用户文档
                     });
                 }
             })

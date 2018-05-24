@@ -162,7 +162,7 @@ router.post('/update', function (req, res) {
                     db.close();
                     return res.send({statueCode: error.code, msg: '该文章名已存在'})
                 } else {
-                    const updatedAt = new Date().toLocaleString()
+                    const updatedAt = new Date().toLocaleString();
                     //更新
                     collection.update(
                         {_id: ObjectId(id)},
@@ -187,6 +187,30 @@ router.post('/update', function (req, res) {
                         });
                 }
             })
+        });
+    });
+});
+router.get('/delete', function (req, res) {
+    const id = req.query.id
+    //打开数据库
+    MongoClient.connect(url, function (err, db) {
+        if (err) {
+            return res.send(err);//错误，返回 err 信息
+        }
+        //读取 tags 集合
+        db.collection('articles', function (err, collection) {
+            if (err) {
+                db.close();
+                return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
+            }
+            //更新
+            collection.deleteOne({_id: ObjectId(id)}, (function (err) {
+                db.close();
+                if (err) {
+                    return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
+                }
+                return res.send({statueCode: success.code, msg: '删除成功'});//成功
+            }));
         });
     });
 });
