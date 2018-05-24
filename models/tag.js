@@ -5,10 +5,10 @@ const {success, error} = require('./config');
 const ObjectId = require('mongodb').ObjectId
 const SORT = 1
 const TAG = 2
-router.get('/add', function (req, res) {
-    const category = req.query.category
-    const name = req.query.sortOrTagName
-    const color = req.query.color
+router.post('/add', function (req, res) {
+    const category = req.body.category
+    const name = req.body.sortOrTagName
+    const color = req.body.color
     if (!category) {
         return res.send({statueCode: error.code, msg: '请选择类别'})
     } else if (!name) {
@@ -81,11 +81,11 @@ router.get('/select', function (req, res) {
         });
     });
 });
-router.get('/update', function (req, res) {
-    const id = req.query._id
-    const name = req.query.name
-    const color = req.query.color
-    const category = req.query.category
+router.post('/update', function (req, res) {
+    const id = req.body._id
+    const name = req.body.name
+    const color = req.body.color
+    const category = req.body.category
     if (!name) {
         return res.send({statueCode: error.code, msg: '名称不能为空'})
     } else if (!color) {

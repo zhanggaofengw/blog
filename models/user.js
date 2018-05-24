@@ -69,9 +69,9 @@ router.get('/queryOne', function (req, res) {
         });
     });
 });
-router.get('/add', function (req, res) {
-    const name = req.query.name
-    let password = req.query.password
+router.post('/add', function (req, res) {
+    const name = req.body.name
+    let password = req.body.password
     if (!name) {
         return res.send({statueCode: error.code, msg: '用户名不能为空'})
     } else if (!password) {
@@ -122,9 +122,9 @@ router.get('/add', function (req, res) {
         });
     });
 });
-router.get('/update', function (req, res) {
-    const id = req.query.id
-    const name = req.query.name
+router.post('/update', function (req, res) {
+    const id = req.body.id
+    const name = req.body.name
     if (!name) {
         return res.send({statueCode: error.code, msg: '用户名不能为空'})
     }
