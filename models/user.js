@@ -229,4 +229,40 @@ router.get('/resetPassword', function (req, res) {
         });
     });
 });
+router.get('/updatePassword', function (req, res) {
+    const name = req.query.name
+    const password = req.query.password
+    if (!name) {
+        return res.send({statueCode: error.code, msg: '用户名不能为空'})
+    } else if (!password) {
+        return res.send({statueCode: error.code, msg: '密码不能为空'})
+    }
+    //打开数据库
+    MongoClient.connect(url, function (err, db) {
+        if (err) {
+            return res.send(err);//错误，返回 err 信息
+        }
+        //读取 users 集合
+        db.collection('users', function (err, collection) {
+            if (err) {
+                db.close();
+                return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
+            }
+            //修改
+            collection.update(
+                {name: name},
+                {
+                    $set: {
+                        password: password
+                    }
+                }, function (err) {
+                    db.close();
+                    if (err) {
+                        return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
+                    }
+                    res.send({statueCode: success.code, msg: '密码修改成功'});//成功！err 为 null
+                });
+        });
+    });
+});
 module.exports = router;
