@@ -2,13 +2,13 @@ const express = require('express');
 const router = express();
 const {MongoClient, url}= require('./db');
 const {success, error} = require('./config');
-const ObjectId = require('mongodb').ObjectId
-const SORT = 1
-const TAG = 2
+const ObjectId = require('mongodb').ObjectId;
+const SORT = 1;
+const TAG = 2;
 router.post('/add', function (req, res) {
-    const category = req.body.category
-    const name = req.body.sortOrTagName
-    const color = req.body.color
+    const category = req.body.category;
+    const name = req.body.sortOrTagName;
+    const color = req.body.color;
     if (!category) {
         return res.send({statueCode: error.code, msg: '请选择类别'})
     } else if (!name) {
@@ -82,14 +82,14 @@ router.get('/select', function (req, res) {
     });
 });
 router.post('/update', function (req, res) {
-    const id = req.body._id
-    const name = req.body.name
-    const color = req.body.color
-    const category = req.body.category
+    const id = req.body._id;
+    const name = req.body.name;
+    const color = req.body.color;
+    const category = req.body.category;
     if (!name) {
-        return res.send({statueCode: error.code, msg: '名称不能为空'})
+        return res.send({statueCode: error.code, msg: '名称不能为空'});
     } else if (!color) {
-        return res.send({statueCode: error.code, msg: '颜色不能为空'})
+        return res.send({statueCode: error.code, msg: '颜色不能为空'});
     }
     //打开数据库
     MongoClient.connect(url, function (err, db) {
@@ -133,11 +133,11 @@ router.post('/update', function (req, res) {
                                 let query = {}
                                 let set = {}
                                 if (category == 1) {
-                                    query = {"articleSorts._id": id}
-                                    set = {"articleSorts.$.name": name, "articleSorts.$.color": color}
+                                    query = {"articleSorts._id": id};
+                                    set = {"articleSorts.$.name": name, "articleSorts.$.color": color};
                                 } else {
-                                    query = {"articleTags._id": id}
-                                    set = {"articleTags.$.name": name, "articleTags.$.color": color}
+                                    query = {"articleTags._id": id};
+                                    set = {"articleTags.$.name": name, "articleTags.$.color": color};
                                 }
                                 //更新
                                 collection.update(
@@ -159,7 +159,7 @@ router.post('/update', function (req, res) {
     });
 });
 router.get('/delete', function (req, res) {
-    const id = req.query.id
+    const id = req.query.id;
     //打开数据库
     MongoClient.connect(url, function (err, db) {
         if (err) {
@@ -182,4 +182,4 @@ router.get('/delete', function (req, res) {
         });
     });
 });
-module.exports = router
+module.exports = router;

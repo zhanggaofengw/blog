@@ -4,12 +4,12 @@ const express = require('express');
 const router = express();
 //读取用户信息
 router.get('/', (req, res) => {
-    const name = req.query.name
-    let password = req.query.password
+    const name = req.query.name;
+    let password = req.query.password;
     if (!name) {
-        return res.send({statueCode: error.code, msg: '用户名不能为空'})
+        return res.send({statueCode: error.code, msg: '用户名不能为空'});
     } else if (!password) {
-        return res.send({statueCode: error.code, msg: '密码不能为空'})
+        return res.send({statueCode: error.code, msg: '密码不能为空'});
     }
     //打开数据库
     MongoClient.connect(url,function (err, db) {
@@ -32,9 +32,9 @@ router.get('/', (req, res) => {
                 }
                 if (user) {
                     db.close();
-                    return res.send({statueCode: error.code, msg: '该用户已存在'})
+                    return res.send({statueCode: error.code, msg: '该用户已存在'});
                 } else {
-                    const createdAt = new Date().toLocaleString()
+                    const createdAt = new Date().toLocaleString();
                     //将用户数据插入 users 集合
                     collection.insert({
                         name: name,
@@ -55,5 +55,5 @@ router.get('/', (req, res) => {
             })
         });
     });
-})
-module.exports = router
+});
+module.exports = router;

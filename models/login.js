@@ -6,21 +6,21 @@ const router = express();
 const ObjectId = require('mongodb').ObjectId;
 //读取用户信息
 router.get('/', (req, res) => {
-    const name = req.query.name
-    const password = req.query.password
-    let captcha
+    const name = req.query.name;
+    const password = req.query.password;
+    let captcha;
     if (req.query.captcha) {
-        captcha = req.query.captcha.toLowerCase()
+        captcha = req.query.captcha.toLowerCase();
     }
-    const captchaTime = req.query.time
+    const captchaTime = req.query.time;
     if (!name) {
-        return res.send({statueCode: error.code, msg: '用户名不能为空'})
+        return res.send({statueCode: error.code, msg: '用户名不能为空'});
     } else if (!password) {
-        return res.send({statueCode: error.code, msg: '密码不能为空'})
+        return res.send({statueCode: error.code, msg: '密码不能为空'});
     } else if (!captcha) {
-        return res.send({statueCode: error.code, msg: '验证码不能为空'})
+        return res.send({statueCode: error.code, msg: '验证码不能为空'});
     } else if (captcha !== req.session[captchaTime]) {
-        return res.send({statueCode: error.code, msg: '验证码错误'})
+        return res.send({statueCode: error.code, msg: '验证码错误'});
     }
     //打开数据库
     MongoClient.connect(url,(err, db) => {

@@ -4,9 +4,9 @@ const {MongoClient, url}= require('./db');
 const {success, error} = require('./config');
 const ObjectId = require('mongodb').ObjectId;
 router.get('/query', function (req, res) {
-    const param = req.query.param
-    const currentPage = parseInt(req.query.currentPage)
-    const pageSize = parseInt(req.query.pageSize)
+    const param = req.query.param;
+    const currentPage = parseInt(req.query.currentPage);
+    const pageSize = parseInt(req.query.pageSize);
     //打开数据库
     MongoClient.connect(url, function (err, db) {
         if (err) {
@@ -18,14 +18,14 @@ router.get('/query', function (req, res) {
                 db.close();
                 return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
             }
-            let query = {}
+            let query = {};
             query = {
                 name: {$regex: param, $options: "$i"}
                 //$or: [
                 //    {articleTitle: {$regex: param, $options: "$i"}},
                 //    {articleContent: {$regex: param, $options: "$i"}}
                 //]
-            }
+            };
             //查询所有
             collection.count(query, function (err, total) {
                 if (err) {
@@ -44,7 +44,7 @@ router.get('/query', function (req, res) {
     });
 });
 router.get('/queryOne', function (req, res) {
-    const id = req.query.id
+    const id = req.query.id;
     //打开数据库
     MongoClient.connect(url, function (err, db) {
         if (err) {
@@ -70,12 +70,12 @@ router.get('/queryOne', function (req, res) {
     });
 });
 router.post('/add', function (req, res) {
-    const name = req.body.name
-    let password = req.body.password
+    const name = req.body.name;
+    let password = req.body.password;
     if (!name) {
-        return res.send({statueCode: error.code, msg: '用户名不能为空'})
+        return res.send({statueCode: error.code, msg: '用户名不能为空'});
     } else if (!password) {
-        return res.send({statueCode: error.code, msg: '密码不能为空'})
+        return res.send({statueCode: error.code, msg: '密码不能为空'});
     }
     //打开数据库
     MongoClient.connect(url, function (err, db) {
@@ -100,7 +100,7 @@ router.post('/add', function (req, res) {
                     db.close();
                     return res.send({statueCode: error.code, msg: '该用户已存在'})
                 } else {
-                    const createdAt = new Date().toLocaleString()
+                    const createdAt = new Date().toLocaleString();
                     //将用户数据插入 users 集合
                     collection.insert({
                         name: name,
@@ -123,10 +123,10 @@ router.post('/add', function (req, res) {
     });
 });
 router.post('/update', function (req, res) {
-    const id = req.body.id
-    const name = req.body.name
+    const id = req.body.id;
+    const name = req.body.name;
     if (!name) {
-        return res.send({statueCode: error.code, msg: '用户名不能为空'})
+        return res.send({statueCode: error.code, msg: '用户名不能为空'});
     }
     //打开数据库
     MongoClient.connect(url, function (err, db) {
@@ -172,7 +172,7 @@ router.post('/update', function (req, res) {
     });
 });
 router.get('/delete', function (req, res) {
-    const id = req.query.id
+    const id = req.query.id;
     //打开数据库
     MongoClient.connect(url, function (err, db) {
         if (err) {
@@ -196,10 +196,10 @@ router.get('/delete', function (req, res) {
     });
 });
 router.get('/resetPassword', function (req, res) {
-    const id = req.query.id
-    const password = req.query.password
+    const id = req.query.id;
+    const password = req.query.password;
     if (!password) {
-        return res.send({statueCode: error.code, msg: '密码不能为空'})
+        return res.send({statueCode: error.code, msg: '密码不能为空'});
     }
     //打开数据库
     MongoClient.connect(url, function (err, db) {
@@ -230,12 +230,12 @@ router.get('/resetPassword', function (req, res) {
     });
 });
 router.get('/updatePassword', function (req, res) {
-    const name = req.query.name
-    const password = req.query.password
+    const name = req.query.name;
+    const password = req.query.password;
     if (!name) {
-        return res.send({statueCode: error.code, msg: '用户名不能为空'})
+        return res.send({statueCode: error.code, msg: '用户名不能为空'});
     } else if (!password) {
-        return res.send({statueCode: error.code, msg: '密码不能为空'})
+        return res.send({statueCode: error.code, msg: '密码不能为空'});
     }
     //打开数据库
     MongoClient.connect(url, function (err, db) {

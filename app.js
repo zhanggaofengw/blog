@@ -8,8 +8,8 @@ const settings = require('./settings');
 const app = express();
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
-app.use(cookieParser())
-app.use(express.static(path.join(__dirname, 'public')))
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
 // 跨域设置
 app.all('*', function (req, res, next) {
     if (req.path !== '/' && !req.path.includes('.')) {
@@ -28,7 +28,7 @@ app.all('*', function (req, res, next) {
     //    }
     //}
     next()
-})
+});
 
 app.use(session({
     secret: settings.cookieSecret,
@@ -61,6 +61,9 @@ app.use("/article", require("./models/article"));
 
 //用户管理
 app.use("/user", require("./models/user"));
+
+//访问统计
+app.use("/visit", require("./models/visit"));
 
 const port = process.env.PORT || 8888;
 

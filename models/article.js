@@ -2,23 +2,29 @@ const express = require('express');
 const router = express();
 const {MongoClient, url}= require('./db');
 const {success, error} = require('./config');
-const ObjectId = require('mongodb').ObjectId
+const ObjectId = require('mongodb').ObjectId;
 router.post('/add', function (req, res) {
-    const articleType = req.body.type //1为保存文章，0为草稿
-    const articleTitle = req.body.articleTitle
-    const articleSorts = req.body.articleSorts
-    const articleTags = req.body.articleTags
-    const articleComment = req.body.comment //1、开启评论 0、关闭评论
-    const articleContent = req.body.content
+    const articleType = req.body.type;//1为保存文章，0为草稿
+    const articleTitle = req.body.articleTitle;
+    const articleSorts = req.body.articleSorts;
+    const articleTags = req.body.articleTags;
+    const articleComment = req.body.comment; //1、开启评论 0、关闭评论
+    const articleContent = req.body.content;
+    const articleKeywords = req.body.articleKeywords;
+    const articleDescription = req.body.articleDescription;
     if (articleType == 1) {
         if (!articleTitle) {
-            return res.send({statueCode: error.code, msg: '请输入文章标题'})
+            return res.send({statueCode: error.code, msg: '请输入文章标题'});
         } else if (!articleSorts) {
-            return res.send({statueCode: error.code, msg: '请至少选择一项文章文类'})
+            return res.send({statueCode: error.code, msg: '请至少选择一项文章文类'});
         } else if (!articleTags) {
-            return res.send({statueCode: error.code, msg: '请至少选择一项文章标签'})
+            return res.send({statueCode: error.code, msg: '请至少选择一项文章标签'});
         } else if (!articleContent) {
-            return res.send({statueCode: error.code, msg: '请输入文章内容'})
+            return res.send({statueCode: error.code, msg: '请输入文章内容'});
+        } else if (!articleKeywords) {
+            return res.send({statueCode: error.code, msg: '请输入文章关键字'});
+        } else if (!articleDescription) {
+            return res.send({statueCode: error.code, msg: '请输入文章摘要'});
         }
     }
     //打开数据库
@@ -44,7 +50,7 @@ router.post('/add', function (req, res) {
                     db.close();
                     return res.send({statueCode: error.code, msg: '该文章名已存在'})
                 } else {
-                    const createdAt = new Date().toLocaleString()
+                    const createdAt = new Date().toLocaleString();
                     //将数据插入 articles 集合
                     collection.insert({
                         articleTitle: articleTitle,
@@ -52,6 +58,8 @@ router.post('/add', function (req, res) {
                         articleTags: articleTags,
                         articleContent: articleContent,
                         articleComment: articleComment,
+                        articleKeywords: articleKeywords,
+                        articleDescription: articleDescription,
                         createdAt: createdAt,
                         updatedAt: createdAt,
                         articleType: articleType,
@@ -63,8 +71,8 @@ router.post('/add', function (req, res) {
                         if (err) {
                             return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
                         }
-                        let msg = ''
-                        articleType == 1 ? msg = '新增文章成功' : msg = '成功保存为草稿'
+                        let msg = '';
+                        articleType == 1 ? msg = '新增文章成功' : msg = '成功保存为草稿';
                         res.send({statueCode: success.code, msg: msg});//成功！
                     });
                 }
@@ -73,10 +81,10 @@ router.post('/add', function (req, res) {
     });
 });
 router.get('/query', function (req, res) {
-    const id = req.query.id
-    const param = req.query.param
-    const currentPage = parseInt(req.query.currentPage)
-    const pageSize = parseInt(req.query.pageSize)
+    const id = req.query.id;
+    const param = req.query.param;
+    const currentPage = parseInt(req.query.currentPage);
+    const pageSize = parseInt(req.query.pageSize);
     //打开数据库
     MongoClient.connect(url, function (err, db) {
         if (err) {
@@ -88,7 +96,7 @@ router.get('/query', function (req, res) {
                 db.close();
                 return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
             }
-            let query = {}
+            let query = {};
             if (id) {
                 query = {
                     _id: ObjectId(id)
@@ -103,12 +111,12 @@ router.get('/query', function (req, res) {
                 }
             }
             //查询所有
-            collection.count(query, function(err, total) {
+            collection.count(query, function (err, total) {
                 if (err) {
                     db.close();
                     return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
                 }
-                collection.find(query).skip((currentPage-1) * pageSize).sort("createdAt", -1).limit(pageSize).toArray(function (err, articles) {
+                collection.find(query).skip((currentPage - 1) * pageSize).sort("createdAt", -1).limit(pageSize).toArray(function (err, articles) {
                     db.close();
                     if (err) {
                         return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
@@ -120,22 +128,28 @@ router.get('/query', function (req, res) {
     });
 });
 router.post('/update', function (req, res) {
-    const id = req.body._id
-    const articleType = req.body.type //1为保存文章，0为草稿
-    const articleTitle = req.body.articleTitle
-    const articleSorts = req.body.articleSorts
-    const articleTags = req.body.articleTags
-    const articleComment = req.body.comment //1、开启评论 0、关闭评论
-    const articleContent = req.body.content
+    const id = req.body._id;
+    const articleType = req.body.type; //1为保存文章，0为草稿
+    const articleTitle = req.body.articleTitle;
+    const articleSorts = req.body.articleSorts;
+    const articleTags = req.body.articleTags;
+    const articleComment = req.body.comment;//1、开启评论 0、关闭评论
+    const articleContent = req.body.content;
+    const articleKeywords = req.body.articleKeywords;
+    const articleDescription = req.body.articleDescription;
     if (articleType == 1) {
         if (!articleTitle) {
-            return res.send({statueCode: error.code, msg: '请输入文章标题'})
+            return res.send({statueCode: error.code, msg: '请输入文章标题'});
         } else if (!articleSorts) {
-            return res.send({statueCode: error.code, msg: '请至少选择一项文章文类'})
+            return res.send({statueCode: error.code, msg: '请至少选择一项文章文类'});
         } else if (!articleTags) {
-            return res.send({statueCode: error.code, msg: '请至少选择一项文章标签'})
+            return res.send({statueCode: error.code, msg: '请至少选择一项文章标签'});
         } else if (!articleContent) {
-            return res.send({statueCode: error.code, msg: '请输入文章内容'})
+            return res.send({statueCode: error.code, msg: '请输入文章内容'});
+        } else if (!articleKeywords) {
+            return res.send({statueCode: error.code, msg: '请输入文章关键字'});
+        } else if (!articleDescription) {
+            return res.send({statueCode: error.code, msg: '请输入文章摘要'});
         }
     }
     //打开数据库
@@ -173,6 +187,8 @@ router.post('/update', function (req, res) {
                                 articleTags: articleTags,
                                 articleContent: articleContent,
                                 articleComment: articleComment,
+                                articleKeywords: articleKeywords,
+                                articleDescription: articleDescription,
                                 updatedAt: updatedAt,
                                 articleType: articleType
                             }
@@ -181,8 +197,8 @@ router.post('/update', function (req, res) {
                             if (err) {
                                 return res.send({statueCode: error.code, msg: err});//错误，返回 err 信息
                             }
-                            let msg = ''
-                            articleType == 1 ? msg = '修改文章成功' : msg = '成功保存为草稿'
+                            let msg = '';
+                            articleType == 1 ? msg = '修改文章成功' : msg = '成功保存为草稿';
                             res.send({statueCode: success.code, msg: msg});//成功！
                         });
                 }
@@ -191,7 +207,7 @@ router.post('/update', function (req, res) {
     });
 });
 router.get('/delete', function (req, res) {
-    const id = req.query.id
+    const id = req.query.id;
     //打开数据库
     MongoClient.connect(url, function (err, db) {
         if (err) {
@@ -214,4 +230,4 @@ router.get('/delete', function (req, res) {
         });
     });
 });
-module.exports = router
+module.exports = router;
