@@ -65,6 +65,9 @@ app.use("/user", require("./models/user"));
 //访问统计
 app.use("/visit", require("./models/visit"));
 
+//权限列表
+app.use("/permission", require("./models/permission"));
+
 const port = process.env.PORT || 8888;
 
 app.listen(port, () => {

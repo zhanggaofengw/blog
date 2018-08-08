@@ -12,7 +12,7 @@ router.get('/query', function (req, res) {
         if (err) {
             return res.send(err);//错误，返回 err 信息
         }
-        //读取 articles 集合
+        //读取 users 集合
         db.collection('users', function (err, collection) {
             if (err) {
                 db.close();
@@ -72,10 +72,13 @@ router.get('/queryOne', function (req, res) {
 router.post('/add', function (req, res) {
     const name = req.body.name;
     let password = req.body.password;
+    const checkedRole = req.body.checkedRole;
     if (!name) {
         return res.send({statueCode: error.code, msg: '用户名不能为空'});
     } else if (!password) {
         return res.send({statueCode: error.code, msg: '密码不能为空'});
+    } else if (!checkedRole) {
+        return res.send({statueCode: error.code, msg: '至少选择一个角色'});
     }
     //打开数据库
     MongoClient.connect(url, function (err, db) {
@@ -106,6 +109,7 @@ router.post('/add', function (req, res) {
                         name: name,
                         password: password,
                         createdAt: createdAt,
+                        checkedRole: checkedRole,
                         lastVisit: '', //上次登录时间
                         loginCount: 0 //登录次数默认为0
                     }, {
@@ -125,8 +129,11 @@ router.post('/add', function (req, res) {
 router.post('/update', function (req, res) {
     const id = req.body.id;
     const name = req.body.name;
+    const checkedRole = req.body.checkedRole;
     if (!name) {
         return res.send({statueCode: error.code, msg: '用户名不能为空'});
+    } else if (!checkedRole) {
+        return res.send({statueCode: error.code, msg: '至少选择一个角色'});
     }
     //打开数据库
     MongoClient.connect(url, function (err, db) {
@@ -157,7 +164,8 @@ router.post('/update', function (req, res) {
                         {_id: ObjectId(id)},
                         {
                             $set: {
-                                name: name
+                                name: name,
+                                checkedRole: checkedRole
                             }
                         }, function (err) {
                             db.close();
